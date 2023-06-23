@@ -17,11 +17,11 @@ public partial class DiscgolfDbContext : DbContext
     }
 
     public virtual DbSet<Course> Courses { get; set; }
-
     public virtual DbSet<CourseDriveTime> CourseDrivetimes { get; set; }
-    
     public virtual DbSet<UsGeography> UsGeographies { get; set; }
-
+    public virtual DbSet<StateAbbreviations> StateAbbreviations { get; set; }
+    public virtual DbSet<UsGeographyRelationships> UsGeographyRelationships { get; set; }
+    
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         => optionsBuilder.UseSqlServer(_config.GetConnectionString("Database"), 
             x=> x.UseNetTopologySuite());
@@ -88,12 +88,13 @@ public partial class DiscgolfDbContext : DbContext
         {
             entity.HasKey(e => new
             {
-                e.GeoName, 
-                e.GeoType
+                e.GeoId
             }).HasName("TBL_US_GEOGRAPHIES_pk");
 
             entity.ToTable("TBL_US_GEOGRAPHIES");
-
+            
+            entity.Property(e => e.GeoId)
+                .HasColumnName("GEO_ID");
             entity.Property(e => e.GeoName)
                 .HasColumnName("GEO_NAME");
             entity.Property(e => e.GeoType)
@@ -101,6 +102,41 @@ public partial class DiscgolfDbContext : DbContext
             entity.Property(e => e.Boundary)
                 .HasColumnType("Geography")
                 .HasColumnName("BOUNDARY");
+        });
+
+        modelBuilder.Entity<StateAbbreviations>(entity =>
+        {
+            entity.ToTable("TBL_US_STATE_ABBREVIATIONS");
+            
+            entity.HasKey(e => e.FullName).HasName("TBL_US_STATE_ABBREVIATIONS_pk");
+            
+            entity.Property(e => e.FullName)
+                .HasColumnName("FULL_NAME");
+            entity.Property(e => e.Abbreviation)
+                .HasColumnName("ABBREVIATION");
+            entity.Property(e => e.StateNumber)
+                .HasColumnName("STATE_NUMBER");
+        });
+        
+        modelBuilder.Entity<UsGeographyRelationships>(entity =>
+        {
+            entity.ToTable("TBL_US_GEOGRAPHY_RELATIONSHIPS");
+
+            entity.HasKey(e => new
+            {
+                e.RelationshipId
+            }).HasName("TBL_US_GEOGRAPHY_RELATIONSHIPS_pk");
+            
+            entity.Property(e => e.GeoName)
+                .HasColumnName("GEO_NAME");
+            entity.Property(e => e.ParentGeoName)
+                .HasColumnName("PARENT_GEO_NAME");
+            entity.Property(e => e.RelationshipId)
+                .HasColumnName("RELATIONSHIP_ID");
+            entity.Property(e => e.GeoId)
+                .HasColumnName("GEO_ID");
+            entity.Property(e => e.ParentGeoId)
+                .HasColumnName("PARENT_GEO_ID");
         });
 
         OnModelCreatingPartial(modelBuilder);

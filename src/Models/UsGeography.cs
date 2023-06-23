@@ -6,11 +6,12 @@ using NetTopologySuite.Geometries;
 namespace DiscGolfCourseApi.Models;
 
 public class UsGeography
-{
+{   
+    public long GeoId { get; set; }
     public string GeoName { get; set; }
     public string GeoType { get; set; }
     [JsonIgnore]
     public Geometry Boundary { get; set; }
     [NotMapped]
-    public List<LatLng> LatLngs { get; set; }
+    public List<LatLng>? LatLngs { get; set; }
 }

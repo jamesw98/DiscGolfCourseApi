@@ -11,7 +11,7 @@ public class PdgaCourseScraper
 {
     private IConfiguration _config;
     private readonly HttpClient _client;
-    private const string BaseUrl = "https://www.pdga.com/course-directory/course/";
+    private const string BaseUrl = "https://www.pdga.com";
     private const string MapPageTitle = "PDGA Disc Golf Course Directory Map | Professional Disc Golf Association";
 
     public PdgaCourseScraper(IConfiguration config, HttpClient client)
@@ -44,7 +44,7 @@ public class PdgaCourseScraper
         
         var names = mainList.SelectNodes("//a[@href]")
             .Where(x => x.GetAttributeValue("href", string.Empty).Contains("course-directory/course"))
-            .Select(x => x.GetAttributeValue("href", string.Empty).Split("/")[3]);
+            .Select(x => x.GetAttributeValue("href", string.Empty));
         
         return await ScrapeMultipleCourses(names, existingNames);
     }
@@ -91,7 +91,7 @@ public class PdgaCourseScraper
     {
         var locationService = new GoogleLocationService(_config["GoogleLocationServiceApiKey"]);
         
-        var courseDetailsRaw = await _client.GetStringAsync(url);
+        var courseDetailsRaw = await _client.GetStringAsync($"{BaseUrl}{url}");
         var htmlDoc = new HtmlDocument();
         htmlDoc.LoadHtml(courseDetailsRaw);
         

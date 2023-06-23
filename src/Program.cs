@@ -13,7 +13,10 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddDbContext<DiscgolfDbContext>();
 builder.Services.AddScoped<Repository>();
 builder.Services.AddScoped<CourseRepository>();
+builder.Services.AddScoped<DetailsRepository>();
 builder.Services.AddScoped<PdgaCourseScraper>();
+builder.Services.AddScoped<GeographyRepository>();
+
 builder.Services.AddHttpClient();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

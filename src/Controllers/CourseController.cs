@@ -33,6 +33,43 @@ public class CourseController: Controller<CourseRepository>
     }
 
     [HttpGet]
+    [Route("zipcode/{zipcode}")]
+    [SwaggerOperation("Gets all courses that fall within a specific zipcode, optionally returns the geography")]
+    [SwaggerResponse(200, "Found some courses", typeof(CoursesAndGeography))]
+    [SwaggerResponse(404, "Did not find any courses")]
+    [SwaggerResponse(402, "Invalid zipcode")]
+    public IActionResult GetCoursesForZip([FromRoute] string zipcode, [FromQuery] bool includeGeo=false)
+    {
+        try
+        {
+            var details = Repo.GetCoursesInZipcode(zipcode, includeGeo);
+
+            return details.Courses.Any()
+                ? Ok(details)
+                : NotFound($"No courses were found in {zipcode}");
+        }
+        catch (ArgumentException ae)
+        {
+            return BadRequest(ae.Message);
+        }
+    }
+
+    [HttpPost]
+    [Route("find")]
+    [SwaggerOperation("Finds courses that lie within the given geographies")]
+    public IActionResult FindCoursesWithinGeos([FromBody] List<long> geoIds)
+    {
+        try
+        {
+            return Ok(Repo.FindCourses(geoIds));
+        }
+        catch (Exception e)
+        {
+            return Problem(e.Message);
+        }
+    }
+
+    [HttpPut]
     [Route("scrape-many")]
     [SwaggerOperation("Scrapes multiple courses given a url of a course list page")]
     public async Task<IActionResult> ScrapeMany([FromBody] CreateCourseRequest request)
@@ -48,7 +85,7 @@ public class CourseController: Controller<CourseRepository>
     
     [HttpPut]
     [Route("fix-missing-data")]
-    [SwaggerOperation("Fixes missing NTS point, state, and zipcode data for any records in the db")]
+    [SwaggerOperation("Fixes missing NTS point data for any records in the db")]
     public async Task<IActionResult> FixCourses()
     {
         try
